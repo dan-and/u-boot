@@ -47,7 +47,6 @@
 /*
  * High Level Configuration Options
  */
-#define CONFIG_MPC83xx		1
 #define CONFIG_MPC834x		/* MPC834x family (8343, 8347, 8349) */
 #define CONFIG_MPC8349		/* MPC8349 specific */
 
@@ -730,7 +729,6 @@ boards, we say we have two, but don't display a message if we find only one. */
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	230400	/* speed of kgdb serial port */
-#define CONFIG_KGDB_SER_INDEX	2	/* which serial port to use */
 #endif
 
 

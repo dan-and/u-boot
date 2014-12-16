@@ -20,7 +20,6 @@
 #define CONFIG_P3P440		1	    /* Board is P3P440		*/
 #define CONFIG_440GP		1	    /* Specifc GP support	*/
 #define CONFIG_440		1	    /* ... PPC440 family	*/
-#define CONFIG_4xx		1	    /* ... PPC4xx family	*/
 #define CONFIG_BOARD_EARLY_INIT_F 1	    /* Call board_early_init_f	*/
 #define CONFIG_MISC_INIT_R	1	    /* Call misc_init_r		*/
 
@@ -303,6 +302,5 @@
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	230400	/* speed to run kgdb serial port */
-#define CONFIG_KGDB_SER_INDEX	2	/* which serial port to use */
 #endif
 #endif	/* __CONFIG_H */

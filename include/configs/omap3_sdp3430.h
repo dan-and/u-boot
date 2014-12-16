@@ -16,12 +16,11 @@
 /* TODO: REMOVE THE FOLLOWING
  * Retained the following till size.h is removed in u-boot
  */
-#include <asm/sizes.h>
+#include <linux/sizes.h>
 /*
  * High Level Configuration Options
  */
 #define CONFIG_OMAP		1	/* in a TI OMAP core */
-#define CONFIG_OMAP34XX		1	/* which is a 34XX */
 #define CONFIG_OMAP3_3430SDP	1	/* working with SDP Rev2 */
 #define CONFIG_OMAP_COMMON
 

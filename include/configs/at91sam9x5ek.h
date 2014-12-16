@@ -18,7 +18,6 @@
 #define CONFIG_SYS_AT91_MAIN_CLOCK	12000000	/* 12 MHz crystal */
 
 #define CONFIG_AT91SAM9X5EK
-#define CONFIG_AT91FAMILY
 
 #define CONFIG_CMDLINE_TAG		/* enable passing of ATAGs */
 #define CONFIG_SETUP_MEMORY_TAGS
@@ -29,6 +28,8 @@
 
 #define CONFIG_CMD_BOOTZ
 #define CONFIG_OF_LIBFDT
+
+#define CONFIG_SYS_GENERIC_BOARD
 
 /* general purpose I/O */
 #define CONFIG_ATMEL_LEGACY		/* required until (g)pio is fixed */
@@ -44,7 +45,6 @@
 #define LCD_BPP			LCD_COLOR16
 #define LCD_OUTPUT_BPP		24
 #define CONFIG_LCD_LOGO
-#undef LCD_TEST_PATTERN
 #define CONFIG_LCD_INFO
 #define CONFIG_LCD_INFO_BELOW_LOGO
 #define CONFIG_SYS_WHITE_ON_BLACK
@@ -62,14 +62,15 @@
 #define CONFIG_BOOTP_GATEWAY
 #define CONFIG_BOOTP_HOSTNAME
 
+/* no NOR flash */
+#define CONFIG_SYS_NO_FLASH
+
 /*
  * Command line configuration.
  */
 #include <config_cmd_default.h>
 #undef CONFIG_CMD_FPGA
 #undef CONFIG_CMD_IMI
-#undef CONFIG_CMD_IMLS
-#undef CONFIG_CMD_LOADS
 
 #define CONFIG_CMD_PING
 #define CONFIG_CMD_DHCP
@@ -100,9 +101,6 @@
 #define CONFIG_SPI_FLASH_ATMEL
 #define CONFIG_SF_DEFAULT_SPEED		30000000
 #endif
-
-/* no NOR flash */
-#define CONFIG_SYS_NO_FLASH
 
 /* NAND flash */
 #ifdef CONFIG_CMD_NAND
@@ -243,9 +241,5 @@
  * Size of malloc() pool
  */
 #define CONFIG_SYS_MALLOC_LEN		(512 * 1024 + 0x1000)
-
-#ifdef CONFIG_USE_IRQ
-#error CONFIG_USE_IRQ not supported
-#endif
 
 #endif

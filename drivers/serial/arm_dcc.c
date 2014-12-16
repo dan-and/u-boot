@@ -29,7 +29,7 @@
 #include <common.h>
 #include <serial.h>
 
-#if defined(CONFIG_CPU_V6) || 1
+#if defined(CONFIG_CPU_V6)
 /*
  * ARMV6
  */

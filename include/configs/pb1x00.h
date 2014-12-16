@@ -12,9 +12,11 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#define CONFIG_MIPS32		1  /* MIPS32 CPU core	*/
 #define CONFIG_PB1X00		1
 #define CONFIG_SOC_AU1X00	1  /* alchemy series cpu */
+
+#define CONFIG_SYS_GENERIC_BOARD
+#define CONFIG_DISPLAY_BOARDINFO
 
 #ifdef CONFIG_PB1000
 #define CONFIG_SOC_AU1000	1
@@ -29,8 +31,6 @@
 #endif
 #endif
 #endif
-
-#define CONFIG_SYS_LITTLE_ENDIAN
 
 #define CONFIG_ETHADDR		DE:AD:BE:EF:01:01    /* Ethernet address */
 

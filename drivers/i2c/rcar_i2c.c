@@ -121,9 +121,11 @@ rcar_i2c_raw_read(struct rcar_i2c *dev, u8 chip, uint addr)
 	writel((chip << 1) | 1, &dev->icmar);
 	/* start master receive */
 	writel(MCR_MDBS | MCR_MIE | MCR_ESG, &dev->icmcr);
+	/* clear status */
+	writel(0, &dev->icmsr);
 
-	while ((readl(&dev->icmsr) & (MSR_MAT | MSR_MDE))
-		!= (MSR_MAT | MSR_MDE))
+	while ((readl(&dev->icmsr) & (MSR_MAT | MSR_MDR))
+		!= (MSR_MAT | MSR_MDR))
 		udelay(10);
 
 	/* clear ESG */

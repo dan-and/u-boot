@@ -1,35 +1,44 @@
 /*
- * Watchdog driver for the Allwinner sunxi platform.
- * Copyright (C) 2013  Oliver Schinagl <oliver@schinagl.nl>
- * http://www.linux-sunxi.org/
+ * (C) Copyright 2014
+ * Chen-Yu Tsai <wens@csie.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * Watchdog register definitions
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA  02110-1301, USA.
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef _SUNXI_WATCHDOG_H_
 #define _SUNXI_WATCHDOG_H_
 
-/* Timeout limits */
-#define WDT_MAX_TIMEOUT 16
-#define WDT_OFF -1
+#define WDT_CTRL_RESTART	(0x1 << 0)
+#define WDT_CTRL_KEY		(0x0a57 << 1)
 
-#ifndef __ASSEMBLY__
-void watchdog_reset(void);
-void watchdog_set(int timeout);
-void watchdog_init(void);
-#endif /* __ASSEMBLY__ */
+#if defined(CONFIG_MACH_SUN4I) || defined(CONFIG_MACH_SUN5I) || defined(CONFIG_MACH_SUN7I)
+
+#define WDT_MODE_EN		(0x1 << 0)
+#define WDT_MODE_RESET_EN	(0x1 << 1)
+
+struct sunxi_wdog {
+	u32 ctl;		/* 0x00 */
+	u32 mode;		/* 0x04 */
+	u32 res[2];
+};
+
+#else
+
+#define WDT_CFG_RESET		(0x1)
+#define WDT_MODE_EN		(0x1)
+
+struct sunxi_wdog {
+	u32 irq_en;		/* 0x00 */
+	u32 irq_sta;		/* 0x04 */
+	u32 res1[2];
+	u32 ctl;		/* 0x10 */
+	u32 cfg;		/* 0x14 */
+	u32 mode;		/* 0x18 */
+	u32 res2;
+};
 
 #endif
+
+#endif /* _SUNXI_WATCHDOG_H_ */

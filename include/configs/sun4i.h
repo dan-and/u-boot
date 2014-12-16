@@ -3,35 +3,23 @@
  *
  * Configuration settings for the Allwinner A10 (sun4i) CPU
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
-
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
 /*
  * A10 specific configuration
  */
-#define CONFIG_SUN4I		/* sun4i SoC generation */
+#define CONFIG_CLK_FULL_SPEED		1008000000
 
 #define CONFIG_SYS_PROMPT		"sun4i# "
 #define CONFIG_MACH_TYPE		4104
+
+#ifdef CONFIG_USB_EHCI
+#define CONFIG_USB_EHCI_SUNXI
+#define CONFIG_USB_MAX_CONTROLLER_COUNT	2
+#endif
 
 /*
  * Include common sunxi configuration where most the settings are

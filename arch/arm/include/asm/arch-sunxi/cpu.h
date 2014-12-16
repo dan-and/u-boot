@@ -3,23 +3,7 @@
  * Allwinner Technology Co., Ltd. <www.allwinnertech.com>
  * Tom Cubie <tangliang@allwinnertech.com>
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef _SUNXI_CPU_H
@@ -31,8 +15,8 @@
 #define SUNXI_SRAM_A2_BASE		0x00004000	/* 16 kiB */
 #define SUNXI_SRAM_A3_BASE		0x00008000	/* 13 kiB */
 #define SUNXI_SRAM_A4_BASE		0x0000b400	/* 3 kiB */
-#define SUNXI_SRAM_D_BASE		0x01c00000
-#define SUNXI_SRAM_B_BASE		0x01c00000	/* 64 kiB (secure) */
+#define SUNXI_SRAM_D_BASE		0x00010000	/* 4 kiB */
+#define SUNXI_SRAM_B_BASE		0x00020000	/* 64 kiB (secure) */
 
 #define SUNXI_SRAMC_BASE		0x01c00000
 #define SUNXI_DRAMC_BASE		0x01c01000
@@ -53,16 +37,24 @@
 #define SUNXI_MMC1_BASE			0x01c10000
 #define SUNXI_MMC2_BASE			0x01c11000
 #define SUNXI_MMC3_BASE			0x01c12000
+#ifndef CONFIG_MACH_SUN6I
 #define SUNXI_USB0_BASE			0x01c13000
 #define SUNXI_USB1_BASE			0x01c14000
+#endif
 #define SUNXI_SS_BASE			0x01c15000
 #define SUNXI_HDMI_BASE			0x01c16000
 #define SUNXI_SPI2_BASE			0x01c17000
 #define SUNXI_SATA_BASE			0x01c18000
+#ifndef CONFIG_MACH_SUN6I
 #define SUNXI_PATA_BASE			0x01c19000
 #define SUNXI_ACE_BASE			0x01c1a000
 #define SUNXI_TVE1_BASE			0x01c1b000
 #define SUNXI_USB2_BASE			0x01c1c000
+#else
+#define SUNXI_USB0_BASE			0x01c19000
+#define SUNXI_USB1_BASE			0x01c1a000
+#define SUNXI_USB2_BASE			0x01c1b000
+#endif
 #define SUNXI_CSI1_BASE			0x01c1d000
 #define SUNXI_TZASC_BASE		0x01c1e000
 #define SUNXI_SPI3_BASE			0x01c1f000
@@ -86,7 +78,7 @@
 
 #define SUNXI_TP_BASE			0x01c25000
 #define SUNXI_PMU_BASE			0x01c25400
-#define SUNXI_CPUCFG_BASE		0x01c25c00	/* sun7i only ? */
+#define SUN7I_CPUCFG_BASE              0x01c25c00
 
 #define SUNXI_UART0_BASE		0x01c28000
 #define SUNXI_UART1_BASE		0x01c28400
@@ -107,9 +99,19 @@
 
 #define SUNXI_SCR_BASE			0x01c2c400
 
+#ifndef CONFIG_MACH_SUN6I
 #define SUNXI_GPS_BASE			0x01c30000
 #define SUNXI_MALI400_BASE		0x01c40000
 #define SUNXI_GMAC_BASE			0x01c50000
+#else
+#define SUNXI_GMAC_BASE			0x01c30000
+#endif
+
+#define SUNXI_DRAM_COM_BASE		0x01c62000
+#define SUNXI_DRAM_CTL0_BASE		0x01c63000
+#define SUNXI_DRAM_CTL1_BASE		0x01c64000
+#define SUNXI_DRAM_PHY0_BASE		0x01c65000
+#define SUNXI_DRAM_PHY1_BASE		0x01c66000
 
 /* module sram */
 #define SUNXI_SRAM_C_BASE		0x01d00000
@@ -121,6 +123,13 @@
 #define SUNXI_MP_BASE			0x01e80000
 #define SUNXI_AVG_BASE			0x01ea0000
 
+#define SUNXI_RTC_BASE			0x01f00000
+#define SUNXI_PRCM_BASE			0x01f01400
+#define SUN6I_CPUCFG_BASE		0x01f01c00
+#define SUNXI_R_UART_BASE		0x01f02800
+#define SUNXI_R_PIO_BASE		0x01f02c00
+#define SUNXI_P2WI_BASE			0x01f03400
+
 /* CoreSight Debug Module */
 #define SUNXI_CSDM_BASE			0x3f500000
 
@@ -131,17 +140,8 @@
 #define SUNXI_CPU_CFG			(SUNXI_TIMER_BASE + 0x13c)
 
 #ifndef __ASSEMBLY__
-/* boot type */
-enum sunxi_boot_type_t {
-	SUNXI_BOOT_TYPE_NULL,
-	SUNXI_BOOT_TYPE_MMC0,
-	SUNXI_BOOT_TYPE_NAND,
-	SUNXI_BOOT_TYPE_MMC2,
-	SUNXI_BOOT_TYPE_SPI
-};
-
 void sunxi_board_init(void);
-extern void sunxi_reset(void);
+void sunxi_reset(void);
 #endif /* __ASSEMBLY__ */
 
 #endif /* _CPU_H */

@@ -6,10 +6,6 @@
  */
 
 #define DWMCI_CLKSEL		0x09C
-#define DWMCI_SHIFT_0		0x0
-#define DWMCI_SHIFT_1		0x1
-#define DWMCI_SHIFT_2		0x2
-#define DWMCI_SHIFT_3		0x3
 #define DWMCI_SET_SAMPLE_CLK(x)	(x)
 #define DWMCI_SET_DRV_CLK(x)	((x) << 16)
 #define DWMCI_SET_DIV_RATIO(x)	((x) << 24)
@@ -26,6 +22,10 @@
 #define MPSCTRL_ECB_MODE		(0x1<<2)
 #define MPSCTRL_ENCRYPTION		(0x1<<1)
 #define MPSCTRL_VALID			(0x1<<0)
+
+/* CLKSEL Register */
+#define DWMCI_DIVRATIO_BIT		24
+#define DWMCI_DIVRATIO_MASK		0x7
 
 #ifdef CONFIG_OF_CONTROL
 int exynos_dwmmc_init(const void *blob);

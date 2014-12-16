@@ -7,23 +7,7 @@
  *
  * Configuration settings for the Allwinner sunxi series of boards.
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef _SUNXI_COMMON_CONFIG_H
@@ -32,8 +16,7 @@
 /*
  * High Level Configuration Options
  */
-#define CONFIG_ALLWINNER	/* It's a Allwinner chip */
-#define CONFIG_SUNXI		/* which is sunxi family */
+#define CONFIG_SUNXI		/* sunxi family */
 #ifdef CONFIG_SPL_BUILD
 #ifndef CONFIG_SPL_FEL
 #define CONFIG_SYS_THUMB_BUILD	/* Thumbs mode to save space in SPL */
@@ -44,22 +27,32 @@
 
 #define CONFIG_SYS_TEXT_BASE		0x4a000000
 
+#if !defined(CONFIG_SPL_BUILD) && defined(CONFIG_DM)
+# define CONFIG_CMD_DM
+# define CONFIG_DM_GPIO
+# define CONFIG_DM_SERIAL
+# define CONFIG_DW_SERIAL
+# define CONFIG_SYS_MALLOC_F_LEN	(1 << 10)
+#endif
+
 /*
- * Display CPU and Board information
+ * Display CPU information
  */
 #define CONFIG_DISPLAY_CPUINFO
-#define CONFIG_DISPLAY_BOARDINFO
 
 /* Serial & console */
 #define CONFIG_SYS_NS16550
 #define CONFIG_SYS_NS16550_SERIAL
 /* ns16550 reg in the low bits of cpu reg */
-#define CONFIG_SYS_NS16550_REG_SIZE	(-4)
-#define CONFIG_SYS_NS16550_CLK		(24000000)
-#define CONFIG_SYS_NS16550_COM1		SUNXI_UART0_BASE
-#define CONFIG_SYS_NS16550_COM2		SUNXI_UART1_BASE
-#define CONFIG_SYS_NS16550_COM3		SUNXI_UART2_BASE
-#define CONFIG_SYS_NS16550_COM4		SUNXI_UART3_BASE
+#define CONFIG_SYS_NS16550_CLK		24000000
+#ifndef CONFIG_DM_SERIAL
+# define CONFIG_SYS_NS16550_REG_SIZE	-4
+# define CONFIG_SYS_NS16550_COM1		SUNXI_UART0_BASE
+# define CONFIG_SYS_NS16550_COM2		SUNXI_UART1_BASE
+# define CONFIG_SYS_NS16550_COM3		SUNXI_UART2_BASE
+# define CONFIG_SYS_NS16550_COM4		SUNXI_UART3_BASE
+# define CONFIG_SYS_NS16550_COM5		SUNXI_R_UART_BASE
+#endif
 
 /* DRAM Base */
 #define CONFIG_SYS_SDRAM_BASE		0x40000000
@@ -71,21 +64,20 @@
 #define CONFIG_SYS_INIT_SP_ADDR \
 	(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET)
 
-/* A10 has 1 banks of DRAM, we use only bank 1 in U-Boot */
 #define CONFIG_NR_DRAM_BANKS		1
 #define PHYS_SDRAM_0			CONFIG_SYS_SDRAM_BASE
-#ifdef CONFIG_SUN7I
 #define PHYS_SDRAM_0_SIZE		0x80000000 /* 2 GiB */
-#else
-#define PHYS_SDRAM_0_SIZE		0x40000000 /* 1 GiB */
-#endif
-#if 0
-/* Nand config */
-#define CONFIG_NAND
-#define CONFIG_NAND_SUNXI
-#define CONFIG_CMD_NAND                         /* NAND support */
-#define CONFIG_SYS_MAX_NAND_DEVICE      1
-#define CONFIG_SYS_NAND_BASE            0x00
+
+#ifdef CONFIG_AHCI
+#define CONFIG_LIBATA
+#define CONFIG_SCSI_AHCI
+#define CONFIG_SCSI_AHCI_PLAT
+#define CONFIG_SUNXI_AHCI
+#define CONFIG_SYS_SCSI_MAX_SCSI_ID	1
+#define CONFIG_SYS_SCSI_MAX_LUN		1
+#define CONFIG_SYS_SCSI_MAX_DEVICE	(CONFIG_SYS_SCSI_MAX_SCSI_ID * \
+					 CONFIG_SYS_SCSI_MAX_LUN)
+#define CONFIG_CMD_SCSI
 #endif
 
 #define CONFIG_CMD_MEMORY
@@ -94,60 +86,40 @@
 #define CONFIG_SETUP_MEMORY_TAGS
 #define CONFIG_CMDLINE_TAG
 #define CONFIG_INITRD_TAG
-#define CONFIG_CMDLINE_EDITING
 
 /* mmc config */
-/* Can't use MMC slot 0 if the UART is directed there */
-#if !defined CONFIG_UART0_PORT_F || CONFIG_MMC_SUNXI_SLOT != 0
+#if !defined(CONFIG_UART0_PORT_F)
 #define CONFIG_MMC
 #define CONFIG_GENERIC_MMC
 #define CONFIG_CMD_MMC
 #define CONFIG_MMC_SUNXI
-#ifndef CONFIG_MMC_SUNXI_SLOT
 #define CONFIG_MMC_SUNXI_SLOT		0
-#endif
-#define CONFIG_MMC_SUNXI_USE_DMA
 #define CONFIG_ENV_IS_IN_MMC
 #define CONFIG_SYS_MMC_ENV_DEV		0	/* first detected MMC controller */
 #endif
 
-/*
- * Size of malloc() pool
- * 1MB = 0x100000, 0x100000 = 1024 * 1024
- */
-#define CONFIG_SYS_MALLOC_LEN		(CONFIG_ENV_SIZE + (1 << 20))
-
-/* Flat Device Tree (FDT/DT) support */
-#define CONFIG_OF_LIBFDT
-#define CONFIG_SYS_BOOTMAPSZ		(16 << 20)
+/* 4MB of malloc() pool */
+#define CONFIG_SYS_MALLOC_LEN		(CONFIG_ENV_SIZE + (4 << 20))
 
 /*
  * Miscellaneous configurable options
  */
-#define CONFIG_SYS_LONGHELP	/* undef to save memory */
-#define CONFIG_SYS_HUSH_PARSER	/* use "hush" command parser    */
 #define CONFIG_CMD_ECHO
-#define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
-#define CONFIG_SYS_CBSIZE	256	/* Console I/O Buffer Size */
-#define CONFIG_SYS_PBSIZE	384	/* Print Buffer Size */
+#define CONFIG_SYS_CBSIZE	1024	/* Console I/O Buffer Size */
+#define CONFIG_SYS_PBSIZE	1024	/* Print Buffer Size */
 #define CONFIG_SYS_MAXARGS	16	/* max number of command args */
+#define CONFIG_SYS_GENERIC_BOARD
 
 /* Boot Argument Buffer Size */
 #define CONFIG_SYS_BARGSIZE		CONFIG_SYS_CBSIZE
 
-/* memtest works on */
-#define CONFIG_SYS_MEMTEST_START	CONFIG_SYS_SDRAM_BASE
-#define CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_SDRAM_BASE + (256 << 20))
-#define CONFIG_SYS_LOAD_ADDR		0x50000000 /* default load address */
+#define CONFIG_SYS_LOAD_ADDR		0x42000000 /* default load address */
 
 /* standalone support */
-#define CONFIG_STANDALONE_LOAD_ADDR	0x50000000
+#define CONFIG_STANDALONE_LOAD_ADDR	0x42000000
 
-#define CONFIG_SYS_HZ			1000
-
-/* valid baudrates */
+/* baudrate */
 #define CONFIG_BAUDRATE			115200
-#define CONFIG_SYS_BAUDRATE_TABLE	{ 9600, 19200, 38400, 57600, 115200 }
 
 /* The stack sizes are set up in start.S using the settings below */
 #define CONFIG_STACKSIZE		(256 << 10)	/* 256 KiB */
@@ -162,150 +134,18 @@
 #define CONFIG_ENV_OFFSET		(544 << 10) /* (8 + 24 + 512) KiB */
 #define CONFIG_ENV_SIZE			(128 << 10)	/* 128 KiB */
 
-#ifdef CONFIG_SPL_FEL
-#define RUN_BOOT_RAM	"run boot_ram;"
-#else
-#define RUN_BOOT_RAM	""
-#endif
-
-#define CONFIG_BOOTCOMMAND \
-	RUN_BOOT_RAM \
-	"if run loadbootenv; then " \
-	  "echo Loaded environment from ${bootenv};" \
-	  "env import -t ${scriptaddr} ${filesize};" \
-	"fi;" \
-	"if test -n \\\"${uenvcmd}\\\"; then " \
-	  "echo Running uenvcmd ...;" \
-	  "run uenvcmd;" \
-	"fi;" \
-	"if run loadbootscr; then "\
-	  "echo Jumping to ${bootscr};" \
-	  "source ${scriptaddr};" \
-	"fi;" \
-	"run autoboot;" \
-	""
-
-#ifdef CONFIG_CMD_WATCHDOG
-#define	RESET_WATCHDOG "watchdog 0"
-#else
-#define RESET_WATCHDOG "true"
-#endif
-
-#define CONFIG_EXTRA_ENV_SETTINGS \
-	"console=ttyS0,115200\0" \
-	"panicarg=panic=10\0" \
-	"extraargs=\0" \
-	"loglevel=8\0" \
-	"scriptaddr=0x44000000\0" \
-	"device=mmc\0" \
-	"partition=0:1\0" \
-	"setargs=" \
-	  "if test -z \\\\\"$root\\\\\"; then"\
-	    " if test \\\\\"$bootpath\\\\\" = \"/boot/\"; then"\
-	      " root=\"/dev/mmcblk0p1 rootwait\";"\
-	    " else" \
-	      " root=\"/dev/mmcblk0p2 rootwait\";"\
-	    " fi;"\
-	  " fi;"\
-	  " setenv bootargs console=${console} root=${root}" \
-	  " loglevel=${loglevel} ${panicarg} ${extraargs}" \
-	  "\0" \
-	"kernel=uImage\0" \
-	"bootenv=uEnv.txt\0" \
-	"bootscr=boot.scr\0" \
-	"script=script.bin\0" \
-	"loadbootscr=" \
-	  "fatload $device $partition $scriptaddr ${bootscr}" \
-	  " || " \
-	  "ext2load $device $partition $scriptaddr boot/${bootscr}" \
-	  " ||" \
-	  "ext2load $device $partition $scriptaddr ${bootscr}" \
-	  "\0" \
-	"loadbootenv=" \
-	  "fatload $device $partition $scriptaddr ${bootenv}" \
-	  " || " \
-	  "ext2load $device $partition $scriptaddr boot/${bootenv}" \
-	  " || " \
-	  "ext2load $device $partition $scriptaddr ${bootenv}" \
-	  "\0" \
-	"loadkernel=" \
-	  "if "\
-	    "bootpath=/boot/" \
-	    " && " \
-	    "ext2load $device $partition 0x43000000 ${bootpath}${script}" \
-	    " && " \
-	    "ext2load $device $partition 0x48000000 ${bootpath}${kernel}" \
-	  ";then true; elif " \
-	    "bootpath=/" \
-	    " && " \
-	    "fatload $device $partition 0x43000000 ${script}" \
-	    " && " \
-	    "fatload $device $partition 0x48000000 ${kernel}" \
-	  ";then true; elif " \
-	    "bootpath=/" \
-	    " && " \
-	    "ext2load $device $partition 0x43000000 ${bootpath}${script}" \
-	    " && " \
-	    "ext2load $device $partition 0x48000000 ${bootpath}${kernel}" \
-	  ";then true; else "\
-	    "false" \
-	  ";fi" \
-	  "\0" \
-	"autoboot=" \
-	  "run loadkernel" \
-	  " && " \
-	  "run setargs" \
-	  " && " \
-	  RESET_WATCHDOG \
-	  " && " \
-	  "bootm 0x48000000" \
-	  "\0" \
-	"boot_ram=" \
-	  "saved_stdout=$stdout;setenv stdout nc;"\
-	  "if iminfo 0x41000000; then" \
-	    " " RESET_WATCHDOG ";"\
-	    " setenv stdout $saved_stdout;" \
-	    " source 0x41000000;" \
-	  "else" \
-	    " setenv stdout $saved_stdout;" \
-	  "fi" \
-	  "\0" \
-	""
-
-#define CONFIG_BOOTDELAY	1
-#define CONFIG_SYS_BOOT_GET_CMDLINE
-#define CONFIG_AUTO_COMPLETE
-
 #include <config_cmd_default.h>
+#undef CONFIG_CMD_FPGA
 
-/* Accept zimage + raw ramdisk without mkimage headers */
-#define CONFIG_CMD_BOOTZ
-#define CONFIG_SUPPORT_RAW_INITRD
-
-#define CONFIG_DOS_PARTITION
-#define CONFIG_CMD_FAT		/* with this we can access fat bootfs */
 #define CONFIG_FAT_WRITE	/* enable write access */
-#define CONFIG_CMD_EXT2		/* with this we can access ext2 bootfs */
-#define CONFIG_CMD_EXT4		/* with this we can access ext4 bootfs */
 
 #define CONFIG_SPL_FRAMEWORK
 #define CONFIG_SPL_LIBCOMMON_SUPPORT
 #define CONFIG_SPL_SERIAL_SUPPORT
 #define CONFIG_SPL_LIBGENERIC_SUPPORT
-#define CONFIG_SPL_DISPLAY_PRINT
-
-/* Falcon boot mode support */
-/* Disabled by default on sun4i/sun7i. Many GCC versions produces a too
- * large SPL for A10/A20 with this on. sun5i however accepts a much larger
- * SPL
- */
-#if defined( CONFIG_SUN5I ) || defined ( CONFIG_SYS_THUMB_BUILD )
-#define CONFIG_SPL_OS_BOOT
-#endif
 
 #ifdef CONFIG_SPL_FEL
 
-#define CONFIG_SPL
 #define CONFIG_SPL_LDSCRIPT "arch/arm/cpu/armv7/sunxi/u-boot-spl-fel.lds"
 #define CONFIG_SPL_START_S_PATH "arch/arm/cpu/armv7/sunxi"
 #define CONFIG_SPL_TEXT_BASE		0x2000
@@ -313,15 +153,11 @@
 
 #else /* CONFIG_SPL */
 
-#define CONFIG_SPL_BSS_START_ADDR	0x50000000
+#define CONFIG_SPL_BSS_START_ADDR	0x4ff80000
 #define CONFIG_SPL_BSS_MAX_SIZE		0x80000		/* 512 KiB */
 
 #define CONFIG_SPL_TEXT_BASE		0x20		/* sram start+header */
-#ifdef CONFIG_SUN5I
-#define CONFIG_SPL_MAX_SIZE		0x75e0		/* 7748+ is used */
-#else
 #define CONFIG_SPL_MAX_SIZE		0x5fe0		/* 24KB on sun4i/sun7i */
-#endif
 
 #define CONFIG_SPL_LIBDISK_SUPPORT
 #define CONFIG_SPL_MMC_SUPPORT
@@ -332,138 +168,90 @@
 #define CONFIG_SPL_PAD_TO		32768		/* decimal for 'dd' */
 
 #endif /* CONFIG_SPL */
+
 /* end of 32 KiB in sram */
-#define LOW_LEVEL_SRAM_STACK		0x00008000
+#define LOW_LEVEL_SRAM_STACK		0x00008000 /* End of sram */
 #define CONFIG_SPL_STACK		LOW_LEVEL_SRAM_STACK
-
-#ifdef CONFIG_SPL_OS_BOOT
-#define CONFIG_CMD_SPL
-#define CONFIG_SYS_SPL_ARGS_ADDR		(PHYS_SDRAM_0 + 0x100)
-#ifdef CONFIG_SPL_MMC_SUPPORT
-#define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR	1344
-#define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTORS  256
-#define CONFIG_SYS_MMCSD_RAW_MODE_KERNEL_SECTOR 1600
-#endif
-#endif
-
-#undef CONFIG_CMD_FPGA
-#undef CONFIG_CMD_NET
-#undef CONFIG_CMD_NFS
+#define CONFIG_SYS_SPL_MALLOC_START	0x4ff00000
+#define CONFIG_SYS_SPL_MALLOC_SIZE	0x00080000	/* 512 KiB */
 
 /* I2C */
 #define CONFIG_SPL_I2C_SUPPORT
+#define CONFIG_SYS_I2C
+#define CONFIG_SYS_I2C_MVTWSI
 #define CONFIG_SYS_I2C_SPEED		400000
-#define CONFIG_HARD_I2C
-#define CONFIG_SUNXI_I2C
 #define CONFIG_SYS_I2C_SLAVE		0x7f
 #define CONFIG_CMD_I2C
 
-/* Watchdog */
-#if 0
-#define CONFIG_WATCHDOG			/* automatic watchdog support */
-#define CONFIG_CMD_WATCHDOG		/* watchdog command setting the watchdog timeout */
-#endif
-
-/* GPIO */
-#define CONFIG_SUNXI_GPIO
-#define CONFIG_CMD_GPIO
-
 /* PMU */
-#if !defined CONFIG_AXP152_POWER && !defined CONFIG_NO_AXP
-#define CONFIG_AXP209_POWER
-#endif
-#if defined CONFIG_AXP152_POWER || defined CONFIG_AXP209_POWER
+#if defined CONFIG_AXP152_POWER || defined CONFIG_AXP209_POWER || defined CONFIG_AXP221_POWER
 #define CONFIG_SPL_POWER_SUPPORT
 #endif
-
-#ifdef CONFIG_STATUSLED
-#define STATUS_LED_BIT CONFIG_STATUSLED
-#endif
-#ifdef CONFIG_STATUSLED1
-#define STATUS_LED_BIT1 CONFIG_STATUSLED1
-#endif
-#ifdef CONFIG_STATUSLED2
-#define STATUS_LED_BIT2 CONFIG_STATUSLED2
-#endif
-#ifdef CONFIG_STATUSLED3
-#define STATUS_LED_BIT3 CONFIG_STATUSLED3
-#endif
-
-#ifndef CONFIG_SPL_BUILD
-#ifdef STATUS_LED_BIT
-#define CONFIG_GPIO_LED
-#define CONFIG_STATUS_LED
-#ifndef STATUS_LED_BOOT
-#define STATUS_LED_BOOT 0
-#endif
-#ifndef STATUS_LED_STATE
-#define STATUS_LED_STATE STATUS_LED_ON
-#define STATUS_LED_PERIOD 1
-#endif
-#ifndef STATUS_LED_STATE1
-#define STATUS_LED_STATE1 STATUS_LED_OFF
-#define STATUS_LED_PERIOD1 1
-#endif
-#ifndef STATUS_LED_STATE2
-#define STATUS_LED_STATE2 STATUS_LED_OFF
-#define STATUS_LED_PERIOD2 1
-#endif
-#ifndef STATUS_LED_STATE3
-#define STATUS_LED_STATE3 STATUS_LED_OFF
-#define STATUS_LED_PERIOD3 1
-#endif
-#define CONFIG_BOARD_SPECIFIC_LED
-#define CONFIG_CMD_LED
-#endif
-#endif
-
-/* Define this to have serial channel 1 (UART0) redirected to SD port */
-/* #define CONFIG_UART0_PORT_F */
 
 #ifndef CONFIG_CONS_INDEX
 #define CONFIG_CONS_INDEX              1       /* UART0 */
 #endif
 
+/* GPIO */
+#define CONFIG_SUNXI_GPIO
+#define CONFIG_SPL_GPIO_SUPPORT
+#define CONFIG_CMD_GPIO
+
+#ifdef CONFIG_VIDEO
+/*
+ * The amount of RAM that is reserved for the FB. This will not show up as
+ * RAM to the kernel, but will be reclaimed by a KMS driver in future.
+ */
+#define CONFIG_SUNXI_FB_SIZE (8 << 20)
+
+/* Do we want to initialize a simple FB? */
+#define CONFIG_VIDEO_DT_SIMPLEFB
+
+#define CONFIG_VIDEO_SUNXI
+
+#define CONFIG_CFB_CONSOLE
+#define CONFIG_VIDEO_SW_CURSOR
+#define CONFIG_VIDEO_LOGO
+
+/* allow both serial and cfb console. */
+#define CONFIG_CONSOLE_MUX
+/* stop x86 thinking in cfbconsole from trying to init a pc keyboard */
+#define CONFIG_VGA_AS_SINGLE_DEVICE
+
+#define CONFIG_SYS_MEM_TOP_HIDE ((CONFIG_SUNXI_FB_SIZE + 0xFFF) & ~0xFFF)
+
+/* To be able to hook simplefb into dt */
+#ifdef CONFIG_VIDEO_DT_SIMPLEFB
+#define CONFIG_OF_BOARD_SETUP
+#endif
+
+#endif /* CONFIG_VIDEO */
+
 /* Ethernet support */
 #ifdef CONFIG_SUNXI_EMAC
 #define CONFIG_MII			/* MII PHY management		*/
-#define CONFIG_CMD_MII
-#define CONFIG_CMD_NET
 #endif
 
 #ifdef CONFIG_SUNXI_GMAC
 #define CONFIG_DESIGNWARE_ETH		/* GMAC can use designware driver */
 #define CONFIG_DW_AUTONEG
 #define CONFIG_PHY_GIGE			/* GMAC can use gigabit PHY	*/
-#define CONFIG_SYS_DCACHE_OFF		/* dw driver doesn't support dcache */
+#define CONFIG_PHY_ADDR		1
 #define CONFIG_MII			/* MII PHY management		*/
-#define CONFIG_CMD_MII
-#define CONFIG_CMD_NET
+#define CONFIG_PHYLIB
 #endif
 
-#ifdef CONFIG_CMD_NET
-#define CONFIG_CMD_PING
-#define CONFIG_CMD_DHCP
-#define CONFIG_CMD_NFS
-#define CONFIG_CMD_SNTP
-#define CONFIG_TIMESTAMP		/* Needed by SNTP */
-#define CONFIG_CMD_DNS
-#define CONFIG_NETCONSOLE
-#define CONFIG_BOOTP_SUBNETMASK
-#define CONFIG_BOOTP_GATEWAY
-#define CONFIG_BOOTP_HOSTNAME
-#define CONFIG_BOOTP_NISDOMAIN
-#define CONFIG_BOOTP_BOOTPATH
-#define CONFIG_BOOTP_BOOTFILESIZE
-#define CONFIG_BOOTP_DNS
-#define CONFIG_BOOTP_DNS2
-#define CONFIG_BOOTP_SEND_HOSTNAME
-#define CONFIG_BOOTP_NTPSERVER
-#define CONFIG_BOOTP_TIMEOFFSET
-#define CONFIG_BOOTP_MAY_FAIL
-#define CONFIG_BOOTP_SERVERIP
-#define CONFIG_BOOTP_DHCP_REQUEST_DELAY		50000
-#define CONFIG_CMD_ELF
+#ifdef CONFIG_USB_EHCI
+#define CONFIG_CMD_USB
+#define CONFIG_SYS_USB_EHCI_MAX_ROOT_PORTS 1
+#define CONFIG_USB_STORAGE
+#endif
+
+#ifdef CONFIG_USB_KEYBOARD
+#define CONFIG_CONSOLE_MUX
+#define CONFIG_PREBOOT
+#define CONFIG_SYS_STDIO_DEREGISTER
+#define CONFIG_SYS_USB_EVENT_POLL_VIA_INT_QUEUE
 #endif
 
 #if !defined CONFIG_ENV_IS_IN_MMC && \
@@ -471,6 +259,83 @@
     !defined CONFIG_ENV_IS_IN_FAT && \
     !defined CONFIG_ENV_IS_IN_SPI_FLASH
 #define CONFIG_ENV_IS_NOWHERE
+#endif
+
+#define CONFIG_MISC_INIT_R
+#define CONFIG_SYS_CONSOLE_IS_IN_ENV
+
+#ifndef CONFIG_SPL_BUILD
+#include <config_distro_defaults.h>
+
+/* 256M RAM (minimum), 32M uncompressed kernel, 16M compressed kernel, 1M fdt,
+ * 1M script, 1M pxe and the ramdisk at the end */
+#define MEM_LAYOUT_ENV_SETTINGS \
+	"bootm_size=0x10000000\0" \
+	"kernel_addr_r=0x42000000\0" \
+	"fdt_addr_r=0x43000000\0" \
+	"scriptaddr=0x43100000\0" \
+	"pxefile_addr_r=0x43200000\0" \
+	"ramdisk_addr_r=0x43300000\0"
+
+#ifdef CONFIG_MMC
+#define BOOT_TARGET_DEVICES_MMC(func) func(MMC, mmc, 0)
+#else
+#define BOOT_TARGET_DEVICES_MMC(func)
+#endif
+
+#ifdef CONFIG_AHCI
+#define BOOT_TARGET_DEVICES_SCSI(func) func(SCSI, scsi, 0)
+#else
+#define BOOT_TARGET_DEVICES_SCSI(func)
+#endif
+
+#ifdef CONFIG_USB_EHCI
+#define BOOT_TARGET_DEVICES_USB(func) func(USB, usb, 0)
+#else
+#define BOOT_TARGET_DEVICES_USB(func)
+#endif
+
+#define BOOT_TARGET_DEVICES(func) \
+	BOOT_TARGET_DEVICES_MMC(func) \
+	BOOT_TARGET_DEVICES_SCSI(func) \
+	BOOT_TARGET_DEVICES_USB(func) \
+	func(PXE, pxe, na) \
+	func(DHCP, dhcp, na)
+
+#include <config_distro_bootcmd.h>
+
+#ifdef CONFIG_USB_KEYBOARD
+#define CONSOLE_STDIN_SETTINGS \
+	"preboot=usb start\0" \
+	"stdin=serial,usbkbd\0"
+#else
+#define CONSOLE_STDIN_SETTINGS \
+	"stdin=serial\0"
+#endif
+
+#ifdef CONFIG_VIDEO
+#define CONSOLE_STDOUT_SETTINGS \
+	"stdout=serial,vga\0" \
+	"stderr=serial,vga\0"
+#else
+#define CONSOLE_STDOUT_SETTINGS \
+	"stdout=serial\0" \
+	"stderr=serial\0"
+#endif
+
+#define CONSOLE_ENV_SETTINGS \
+	CONSOLE_STDIN_SETTINGS \
+	CONSOLE_STDOUT_SETTINGS
+
+#define CONFIG_EXTRA_ENV_SETTINGS \
+	CONSOLE_ENV_SETTINGS \
+	MEM_LAYOUT_ENV_SETTINGS \
+	"fdtfile=" CONFIG_FDTFILE "\0" \
+	"console=ttyS0,115200\0" \
+	BOOTENV
+
+#else /* ifndef CONFIG_SPL_BUILD */
+#define CONFIG_EXTRA_ENV_SETTINGS
 #endif
 
 #endif /* _SUNXI_COMMON_CONFIG_H */

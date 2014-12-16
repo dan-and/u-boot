@@ -5,23 +5,7 @@
  *
  * Configuration settings for the Allwinner A10-evb board.
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef _SUNXI_TIMER_H_
@@ -30,6 +14,7 @@
 #ifndef __ASSEMBLY__
 
 #include <linux/types.h>
+#include <asm/arch/watchdog.h>
 
 /* General purpose timer */
 struct sunxi_timer {
@@ -52,12 +37,6 @@ struct sunxi_64cnt {
 	u32 ctl;		/* 0xa0 */
 	u32 lo;			/* 0xa4 */
 	u32 hi;			/* 0xa8 */
-};
-
-/* Watchdog */
-struct sunxi_wdog {
-	u32 ctl;		/* 0x90 */
-	u32 mode;		/* 0x94 */
 };
 
 /* Rtc */
@@ -88,15 +67,20 @@ struct sunxi_timer_reg {
 	struct sunxi_timer timer[6];	/* We have 6 timers */
 	u8 res2[16];
 	struct sunxi_avs avs;
-	struct sunxi_wdog wdog;
-	u8 res3[8];
-	struct sunxi_64cnt cnt64;
+#if defined(CONFIG_MACH_SUN4I) || defined(CONFIG_MACH_SUN5I) || defined(CONFIG_MACH_SUN7I)
+	struct sunxi_wdog wdog;	/* 0x90 */
+	/* XXX the following is not accurate for sun5i/sun7i */
+	struct sunxi_64cnt cnt64;	/* 0xa0 */
 	u8 res4[0x58];
 	struct sunxi_rtc rtc;
 	struct sunxi_alarm alarm;
 	struct sunxi_tgp tgp[4];
 	u8 res5[8];
 	u32 cpu_cfg;
+#else /* CONFIG_MACH_SUN6I || CONFIG_MACH_SUN8I || ... */
+	u8 res3[16];
+	struct sunxi_wdog wdog[5];	/* We have 5 watchdogs */
+#endif
 };
 
 #endif /* __ASSEMBLY__ */

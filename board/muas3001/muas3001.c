@@ -243,14 +243,11 @@ phys_size_t initdram (int board_type)
 	volatile immap_t *immap = (immap_t *) CONFIG_SYS_IMMR;
 	volatile memctl8260_t *memctl = &immap->im_memctl;
 	long psize;
-#ifndef CONFIG_SYS_RAMBOOT
 	long sizelittle, sizebig;
-#endif
 
 	memctl->memc_psrt = CONFIG_SYS_PSRT;
 	memctl->memc_mptpr = CONFIG_SYS_MPTPR;
 
-#ifndef CONFIG_SYS_RAMBOOT
 	/* 60x SDRAM setup:
 	 */
 	sizelittle = try_init (memctl, CONFIG_SYS_PSDMR_LITTLE, CONFIG_SYS_OR1_LITTLE,
@@ -263,7 +260,6 @@ phys_size_t initdram (int board_type)
 		psize = try_init (memctl, CONFIG_SYS_PSDMR_LITTLE, CONFIG_SYS_OR1_LITTLE,
 						  (uchar *) CONFIG_SYS_SDRAM_BASE);
 	}
-#endif /* CONFIG_SYS_RAMBOOT */
 
 	icache_enable ();
 
@@ -286,6 +282,8 @@ int board_early_init_r (void)
 }
 
 #if defined(CONFIG_OF_BOARD_SETUP) && defined(CONFIG_OF_LIBFDT)
+DECLARE_GLOBAL_DATA_PTR;
+
 /*
  * update "memory" property in the blob
  */
@@ -314,7 +312,7 @@ void ft_blob_update (void *blob, bd_t *bd)
 	/* baudrate */
 	nodeoffset = fdt_path_offset (blob, "/soc/cpm/serial");
 	if (nodeoffset >= 0) {
-		speed = cpu_to_be32 (bd->bi_baudrate);
+		speed = cpu_to_be32 (gd->baudrate);
 		ret = fdt_setprop (blob, nodeoffset, "current-speed", &speed,
 					sizeof (unsigned long));
 	if (ret < 0)
@@ -327,9 +325,11 @@ void ft_blob_update (void *blob, bd_t *bd)
 	}
 }
 
-void ft_board_setup (void *blob, bd_t *bd)
+int ft_board_setup(void *blob, bd_t *bd)
 {
 	ft_cpu_setup (blob, bd);
 	ft_blob_update (blob, bd);
+
+	return 0;
 }
 #endif /* defined(CONFIG_OF_BOARD_SETUP) && defined(CONFIG_OF_LIBFDT) */

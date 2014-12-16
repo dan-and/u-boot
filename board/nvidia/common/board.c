@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <dm.h>
 #include <ns16550.h>
 #include <linux/compiler.h>
 #include <asm/io.h>
@@ -31,7 +32,6 @@
 #endif
 #ifdef CONFIG_USB_EHCI_TEGRA
 #include <asm/arch-tegra/usb.h>
-#include <asm/arch/usb.h>
 #include <usb.h>
 #endif
 #ifdef CONFIG_TEGRA_MMC
@@ -44,52 +44,29 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#ifdef CONFIG_SPL_BUILD
+/* TODO(sjg@chromium.org): Remove once SPL supports device tree */
+U_BOOT_DEVICE(tegra_gpios) = {
+	"gpio_tegra"
+};
+#endif
+
 const struct tegra_sysinfo sysinfo = {
 	CONFIG_TEGRA_BOARD_STRING
 };
 
-#ifndef CONFIG_SPL_BUILD
-/*
- * Routine: timer_init
- * Description: init the timestamp and lastinc value
- */
-int timer_init(void)
-{
-	return 0;
-}
-#endif
+__weak void pinmux_init(void) {}
+__weak void pin_mux_usb(void) {}
+__weak void pin_mux_spi(void) {}
+__weak void gpio_early_init_uart(void) {}
+__weak void pin_mux_display(void) {}
 
-void __pin_mux_usb(void)
-{
-}
-
-void pin_mux_usb(void) __attribute__((weak, alias("__pin_mux_usb")));
-
-void __pin_mux_spi(void)
-{
-}
-
-void pin_mux_spi(void) __attribute__((weak, alias("__pin_mux_spi")));
-
-void __gpio_early_init_uart(void)
-{
-}
-
-void gpio_early_init_uart(void)
-__attribute__((weak, alias("__gpio_early_init_uart")));
-
-void __pin_mux_nand(void)
+#if defined(CONFIG_TEGRA_NAND)
+__weak void pin_mux_nand(void)
 {
 	funcmux_select(PERIPH_ID_NDFLASH, FUNCMUX_DEFAULT);
 }
-
-void pin_mux_nand(void) __attribute__((weak, alias("__pin_mux_nand")));
-
-void __pin_mux_display(void)
-{
-}
-
-void pin_mux_display(void) __attribute__((weak, alias("__pin_mux_display")));
+#endif
 
 /*
  * Routine: power_det_init
@@ -118,9 +95,8 @@ int board_init(void)
 	clock_init();
 	clock_verify();
 
-#ifdef CONFIG_FDT_SPI
+#ifdef CONFIG_TEGRA_SPI
 	pin_mux_spi();
-	spi_init();
 #endif
 
 #ifdef CONFIG_PWM_TEGRA
@@ -137,10 +113,6 @@ int board_init(void)
 	power_det_init();
 
 #ifdef CONFIG_SYS_I2C_TEGRA
-#ifndef CONFIG_SYS_I2C_INIT_BOARD
-#error "You must define CONFIG_SYS_I2C_INIT_BOARD to use i2c on Nvidia boards"
-#endif
-	i2c_init_board();
 # ifdef CONFIG_TEGRA_PMU
 	if (pmu_set_nominal())
 		debug("Failed to select nominal voltages\n");
@@ -185,9 +157,7 @@ void gpio_early_init(void) __attribute__((weak, alias("__gpio_early_init")));
 
 int board_early_init_f(void)
 {
-#if !defined(CONFIG_TEGRA20)
 	pinmux_init();
-#endif
 	board_init_uart_f();
 
 	/* Initialize periph GPIOs */
@@ -211,11 +181,9 @@ int board_late_init(void)
 }
 
 #if defined(CONFIG_TEGRA_MMC)
-void __pin_mux_mmc(void)
+__weak void pin_mux_mmc(void)
 {
 }
-
-void pin_mux_mmc(void) __attribute__((weak, alias("__pin_mux_mmc")));
 
 /* this is a weak define that we are overriding */
 int board_mmc_init(bd_t *bd)

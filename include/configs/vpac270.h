@@ -17,7 +17,6 @@
 #define	CONFIG_SYS_TEXT_BASE	0xa0000000
 
 #ifdef	CONFIG_ONENAND
-#define	CONFIG_SPL
 #define	CONFIG_SPL_ONENAND_SUPPORT
 #define	CONFIG_SPL_ONENAND_LOAD_ADDR	0x2000
 #define	CONFIG_SPL_ONENAND_LOAD_SIZE	\
@@ -124,7 +123,6 @@
  */
 #ifdef	CONFIG_CMD_KGDB
 #define	CONFIG_KGDB_BAUDRATE		230400	/* kgdb serial port speed */
-#define	CONFIG_KGDB_SER_INDEX		2	/* which serial port to use */
 #endif
 
 /*
@@ -287,7 +285,7 @@
 /*
  * Memory settings
  */
-#define	CONFIG_SYS_MSC0_VAL	0x3ffc95fa
+#define	CONFIG_SYS_MSC0_VAL	0x3ffc95f9
 #define	CONFIG_SYS_MSC1_VAL	0x02ccf974
 #define	CONFIG_SYS_MSC2_VAL	0x00000000
 #ifdef	CONFIG_RAM_256M

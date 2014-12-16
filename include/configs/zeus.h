@@ -15,7 +15,6 @@
  * High Level Configuration Options
  *----------------------------------------------------------------------*/
 #define CONFIG_ZEUS		1		/* Board is Zeus	*/
-#define CONFIG_4xx		1		/* ... PPC4xx family	*/
 #define CONFIG_405EP		1		/* Specifc 405EP support*/
 
 #define	CONFIG_SYS_TEXT_BASE	0xFFFC0000
@@ -283,7 +282,6 @@
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	230400		/* speed to run kgdb serial port */
-#define CONFIG_KGDB_SER_INDEX	2		/* which serial port to use */
 #endif
 
 /*

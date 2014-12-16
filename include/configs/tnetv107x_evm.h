@@ -11,12 +11,11 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#include <asm/sizes.h>
+#include <linux/sizes.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/clock.h>
 
 /* Architecture, CPU, etc */
-#define CONFIG_ARM1176
 #define CONFIG_TNETV107X
 #define CONFIG_TNETV107X_EVM
 #define CONFIG_TNETV107X_WATCHDOG

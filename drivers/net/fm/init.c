@@ -6,6 +6,7 @@
 #include <common.h>
 #include <asm/io.h>
 #include <asm/fsl_serdes.h>
+#include <fsl_mdio.h>
 
 #include "fm.h"
 
@@ -63,6 +64,12 @@ struct fm_eth_info fm_info[] = {
 #endif
 #if (CONFIG_SYS_NUM_FM1_10GEC >= 2)
 	FM_TGEC_INFO_INITIALIZER(1, 2),
+#endif
+#if (CONFIG_SYS_NUM_FM1_10GEC >= 3)
+	FM_TGEC_INFO_INITIALIZER2(1, 3),
+#endif
+#if (CONFIG_SYS_NUM_FM1_10GEC >= 4)
+	FM_TGEC_INFO_INITIALIZER2(1, 4),
 #endif
 #if (CONFIG_SYS_NUM_FM2_10GEC >= 1)
 	FM_TGEC_INFO_INITIALIZER(2, 1),
@@ -141,6 +148,9 @@ void fm_disable_port(enum fm_port port)
 {
 	int i = fm_port_to_index(port);
 
+	if (i == -1)
+		return;
+
 	fm_info[i].enabled = 0;
 	fman_disable_port(port);
 }
@@ -148,6 +158,9 @@ void fm_disable_port(enum fm_port port)
 void fm_enable_port(enum fm_port port)
 {
 	int i = fm_port_to_index(port);
+
+	if (i == -1)
+		return;
 
 	fm_info[i].enabled = 1;
 	fman_enable_port(port);
@@ -239,10 +252,16 @@ static void ft_fixup_port(void *blob, struct fm_eth_info *info, char *prop)
 	 * FM1_10GEC1 is enabled and  FM1_DTSEC9 is disabled, ensure that the
 	 * dual-role MAC is not disabled, ditto for other dual-role MACs.
 	 */
-	if (((info->port == FM1_DTSEC9) && (PORT_IS_ENABLED(FM1_10GEC1)))	||
-	    ((info->port == FM1_DTSEC10) && (PORT_IS_ENABLED(FM1_10GEC2)))	||
-	    ((info->port == FM1_10GEC1) && (PORT_IS_ENABLED(FM1_DTSEC9)))	||
-	    ((info->port == FM1_10GEC2) && (PORT_IS_ENABLED(FM1_DTSEC10)))
+	if (((info->port == FM1_DTSEC9) && (PORT_IS_ENABLED(FM1_10GEC1)))  ||
+	    ((info->port == FM1_DTSEC10) && (PORT_IS_ENABLED(FM1_10GEC2))) ||
+	    ((info->port == FM1_DTSEC1) && (PORT_IS_ENABLED(FM1_10GEC1)))  ||
+	    ((info->port == FM1_DTSEC1) && (PORT_IS_ENABLED(FM1_10GEC3)))  ||
+	    ((info->port == FM1_DTSEC2) && (PORT_IS_ENABLED(FM1_10GEC4)))  ||
+	    ((info->port == FM1_10GEC1) && (PORT_IS_ENABLED(FM1_DTSEC1)))  ||
+	    ((info->port == FM1_10GEC1) && (PORT_IS_ENABLED(FM1_DTSEC9)))  ||
+	    ((info->port == FM1_10GEC2) && (PORT_IS_ENABLED(FM1_DTSEC10))) ||
+	    ((info->port == FM1_10GEC3) && (PORT_IS_ENABLED(FM1_DTSEC1)))  ||
+	    ((info->port == FM1_10GEC4) && (PORT_IS_ENABLED(FM1_DTSEC2)))
 #if (CONFIG_SYS_NUM_FMAN == 2)
 										||
 	    ((info->port == FM2_DTSEC9) && (PORT_IS_ENABLED(FM2_10GEC1)))	||

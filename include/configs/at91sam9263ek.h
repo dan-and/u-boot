@@ -48,6 +48,8 @@
 #define CONFIG_CMD_BOOTZ
 #define CONFIG_OF_LIBFDT
 
+#define CONFIG_SYS_GENERIC_BOARD
+
 /*
  * Hardware drivers
  */
@@ -103,6 +105,7 @@
 #define CONFIG_CMD_PING		1
 #define CONFIG_CMD_DHCP		1
 #define CONFIG_CMD_NAND		1
+#define CONFIG_CMD_MMC
 #define CONFIG_CMD_USB		1
 
 /* SDRAM */
@@ -116,12 +119,23 @@
 /* DataFlash */
 #define CONFIG_ATMEL_DATAFLASH_SPI
 #define CONFIG_HAS_DATAFLASH		1
-#define CONFIG_SYS_SPI_WRITE_TOUT		(5*CONFIG_SYS_HZ)
 #define CONFIG_SYS_MAX_DATAFLASH_BANKS		1
 #define CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS0	0xC0000000	/* CS0 */
 #define AT91_SPI_CLK			15000000
 #define DATAFLASH_TCSS			(0x1a << 16)
 #define DATAFLASH_TCHS			(0x1 << 24)
+
+/* MMC */
+#ifdef CONFIG_CMD_MMC
+#define CONFIG_MMC
+#define CONFIG_GENERIC_MMC
+#define CONFIG_GENERIC_ATMEL_MCI
+#endif
+
+/* FAT */
+#ifdef CONFIG_CMD_FAT
+#define CONFIG_DOS_PARTITION
+#endif
 
 /* NOR flash, if populated */
 #ifdef CONFIG_SYS_USE_NORFLASH
@@ -275,6 +289,7 @@
 #define CONFIG_RMII			1
 #define CONFIG_NET_RETRY_COUNT		20
 #define CONFIG_RESET_PHY_R		1
+#define CONFIG_AT91_WANTS_COMMON_PHY
 
 /* USB */
 #define CONFIG_USB_ATMEL

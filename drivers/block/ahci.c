@@ -41,7 +41,7 @@ u16 *ataid[AHCI_MAX_PORTS];
 #define WAIT_MS_SPINUP	20000
 #define WAIT_MS_DATAIO	5000
 #define WAIT_MS_FLUSH	5000
-#define WAIT_MS_LINKUP	4
+#define WAIT_MS_LINKUP	200
 
 static inline u32 ahci_port_base(u32 base, u32 port)
 {
@@ -129,6 +129,14 @@ int __weak ahci_link_up(struct ahci_probe_ent *probe_ent, u8 port)
 	return 1;
 }
 
+#ifdef CONFIG_SUNXI_AHCI
+/* The sunxi AHCI controller requires this undocumented setup */
+static void sunxi_dma_init(volatile u8 *port_mmio)
+{
+	clrsetbits_le32(port_mmio + PORT_P0DMACR, 0x0000ff00, 0x00004400);
+}
+#endif
+
 static int ahci_host_init(struct ahci_probe_ent *probe_ent)
 {
 #ifndef CONFIG_SCSI_AHCI_PLAT
@@ -213,11 +221,14 @@ static int ahci_host_init(struct ahci_probe_ent *probe_ent)
 			msleep(500);
 		}
 
+#ifdef CONFIG_SUNXI_AHCI
+		sunxi_dma_init(port_mmio);
+#endif
+
 		/* Add the spinup command to whatever mode bits may
 		 * already be on in the command register.
 		 */
 		cmd = readl(port_mmio + PORT_CMD);
-		cmd |= PORT_CMD_FIS_RX;
 		cmd |= PORT_CMD_SPIN_UP;
 		writel_with_flush(cmd, port_mmio + PORT_CMD);
 
@@ -379,6 +390,11 @@ static int ahci_init_one(pci_dev_t pdev)
 	int rc;
 
 	probe_ent = malloc(sizeof(struct ahci_probe_ent));
+	if (!probe_ent) {
+		printf("%s: No memory for probe_ent\n", __func__);
+		return -ENOMEM;
+	}
+
 	memset(probe_ent, 0, sizeof(struct ahci_probe_ent));
 	probe_ent->dev = pdev;
 
@@ -503,7 +519,7 @@ static int ahci_port_start(u8 port)
 	mem = (u32) malloc(AHCI_PORT_PRIV_DMA_SZ + 2048);
 	if (!mem) {
 		free(pp);
-		printf("No mem for table!\n");
+		printf("%s: No mem for table!\n", __func__);
 		return -ENOMEM;
 	}
 
@@ -539,6 +555,10 @@ static int ahci_port_start(u8 port)
 	writel_with_flush((u32) pp->cmd_slot, port_mmio + PORT_LST_ADDR);
 
 	writel_with_flush(pp->rx_fis, port_mmio + PORT_FIS_ADDR);
+
+#ifdef CONFIG_SUNXI_AHCI
+	sunxi_dma_init(port_mmio);
+#endif
 
 	writel_with_flush(PORT_CMD_ICC_ACTIVE | PORT_CMD_FIS_RX |
 			  PORT_CMD_POWER_ON | PORT_CMD_SPIN_UP |
@@ -618,7 +638,8 @@ static int ata_scsiop_inquiry(ccb *pccb)
 		95 - 4,
 	};
 	u8 fis[20];
-	u16 *tmpid;
+	u16 *idbuf;
+	ALLOC_CACHE_ALIGN_BUFFER(u16, tmpid, ATA_ID_WORDS);
 	u8 port;
 
 	/* Clean ccb data buffer */
@@ -637,28 +658,32 @@ static int ata_scsiop_inquiry(ccb *pccb)
 
 	/* Read id from sata */
 	port = pccb->target;
-	tmpid = malloc(ATA_ID_WORDS * 2);
-	if (!tmpid)
-		return -ENOMEM;
 
 	if (ahci_device_data_io(port, (u8 *) &fis, sizeof(fis), (u8 *)tmpid,
 				ATA_ID_WORDS * 2, 0)) {
 		debug("scsi_ahci: SCSI inquiry command failure.\n");
-		free(tmpid);
 		return -EIO;
 	}
 
-	if (ataid[port])
-		free(ataid[port]);
-	ataid[port] = tmpid;
-	ata_swap_buf_le16(tmpid, ATA_ID_WORDS);
+	if (!ataid[port]) {
+		ataid[port] = malloc(ATA_ID_WORDS * 2);
+		if (!ataid[port]) {
+			printf("%s: No memory for ataid[port]\n", __func__);
+			return -ENOMEM;
+		}
+	}
+
+	idbuf = ataid[port];
+
+	memcpy(idbuf, tmpid, ATA_ID_WORDS * 2);
+	ata_swap_buf_le16(idbuf, ATA_ID_WORDS);
 
 	memcpy(&pccb->pdata[8], "ATA     ", 8);
-	ata_id_strcpy((u16 *) &pccb->pdata[16], &tmpid[ATA_ID_PROD], 16);
-	ata_id_strcpy((u16 *) &pccb->pdata[32], &tmpid[ATA_ID_FW_REV], 4);
+	ata_id_strcpy((u16 *)&pccb->pdata[16], &idbuf[ATA_ID_PROD], 16);
+	ata_id_strcpy((u16 *)&pccb->pdata[32], &idbuf[ATA_ID_FW_REV], 4);
 
 #ifdef DEBUG
-	ata_dump_id(tmpid);
+	ata_dump_id(idbuf);
 #endif
 	return 0;
 }
@@ -705,7 +730,7 @@ static int ata_scsiop_read_write(ccb *pccb, u8 is_write)
 		u16 now_blocks; /* number of blocks per iteration */
 		u32 transfer_size; /* number of bytes per iteration */
 
-		now_blocks = min(MAX_SATA_BLOCKS_READ_WRITE, blocks);
+		now_blocks = min((u16)MAX_SATA_BLOCKS_READ_WRITE, blocks);
 
 		transfer_size = ATA_SECT_SIZE * now_blocks;
 		if (transfer_size > user_buffer_size) {
@@ -889,6 +914,11 @@ int ahci_init(u32 base)
 	u32 linkmap;
 
 	probe_ent = malloc(sizeof(struct ahci_probe_ent));
+	if (!probe_ent) {
+		printf("%s: No memory for probe_ent\n", __func__);
+		return -ENOMEM;
+	}
+
 	memset(probe_ent, 0, sizeof(struct ahci_probe_ent));
 
 	probe_ent->host_flags = ATA_FLAG_SATA
@@ -924,6 +954,11 @@ int ahci_init(u32 base)
 err_out:
 	return rc;
 }
+
+void __weak scsi_init(void)
+{
+}
+
 #endif
 
 /*

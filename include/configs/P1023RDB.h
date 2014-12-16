@@ -10,8 +10,11 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+#define CONFIG_SYS_GENERIC_BOARD
+#define CONFIG_DISPLAY_BOARDINFO
+
 #ifndef CONFIG_SYS_TEXT_BASE
-#define CONFIG_SYS_TEXT_BASE	0xeff80000
+#define CONFIG_SYS_TEXT_BASE	0xeff40000
 #endif
 
 #ifndef CONFIG_SYS_MONITOR_BASE
@@ -25,7 +28,6 @@
 /* High Level Configuration Options */
 #define CONFIG_BOOKE		/* BOOKE */
 #define CONFIG_E500		/* BOOKE e500 family */
-#define CONFIG_MPC85xx
 #define CONFIG_P1023
 #define CONFIG_MP		/* support multiple processors */
 
@@ -74,7 +76,7 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_CHIP_SELECTS_PER_CTRL	1
 
 #define CONFIG_DDR_SPD
-#define CONFIG_FSL_DDR3
+#define CONFIG_SYS_FSL_DDR3
 #define CONFIG_FSL_DDR_INTERACTIVE
 #define CONFIG_SYS_SDRAM_SIZE		512u	/* DDR is 512M */
 #define CONFIG_SYS_SPD_BUS_NUM          0
@@ -126,7 +128,7 @@ extern unsigned long get_clock_freq(void);
 					GENERATED_GBL_DATA_SIZE)
 #define CONFIG_SYS_INIT_SP_OFFSET	CONFIG_SYS_GBL_DATA_OFFSET
 
-#define CONFIG_SYS_MONITOR_LEN	(512 * 1024)	  /* Reserve 512 kB for Mon */
+#define CONFIG_SYS_MONITOR_LEN	(768 * 1024)	  /* Reserve 512 kB for Mon */
 #define CONFIG_SYS_MALLOC_LEN	(6 * 1024 * 1024) /* Reserved for malloc */
 
 #define CONFIG_SYS_NAND_BASE		0xffa00000
@@ -260,11 +262,7 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_ENV_OVERWRITE
 
 #define CONFIG_ENV_IS_IN_FLASH
-#if CONFIG_SYS_MONITOR_BASE > 0xfff80000
-#define CONFIG_ENV_ADDR		0xfff80000
-#else
 #define CONFIG_ENV_ADDR		(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SECT_SIZE)
-#endif
 #define CONFIG_ENV_SIZE		0x2000
 #define CONFIG_ENV_SECT_SIZE	0x20000 /* 128K (one sector) */
 
@@ -365,7 +363,7 @@ extern unsigned long get_clock_freq(void);
 /* Default address of microcode for the Linux Fman driver */
 /* QE microcode/firmware address */
 #define CONFIG_SYS_QE_FMAN_FW_IN_NOR
-#define CONFIG_SYS_QE_FMAN_FW_ADDR	0xeff40000
+#define CONFIG_SYS_FMAN_FW_ADDR	0xEFF00000
 #define CONFIG_SYS_QE_FMAN_FW_LENGTH	0x10000
 #define CONFIG_SYS_FDT_PAD		(0x3000 + CONFIG_SYS_QE_FMAN_FW_LENGTH)
 
@@ -379,6 +377,49 @@ extern unsigned long get_clock_freq(void);
 #endif
 
 #define CONFIG_EXTRA_ENV_SETTINGS	\
+	"netdev=eth0\0"						\
+	"uboot=" __stringify(CONFIG_UBOOTPATH) "\0"		\
+	"loadaddr=1000000\0"					\
+	"ubootaddr=" __stringify(CONFIG_SYS_TEXT_BASE) "\0"	\
+	"tftpflash=tftpboot $loadaddr $uboot; "			\
+		"protect off $ubootaddr +$filesize; "		\
+		"erase $ubootaddr +$filesize; "			\
+		"cp.b $loadaddr $ubootaddr $filesize; "		\
+		"protect on $ubootaddr +$filesize; "		\
+		"cmp.b $loadaddr $ubootaddr $filesize\0"	\
+	"consoledev=ttyS0\0"					\
+	"ramdiskaddr=2000000\0"					\
+	"ramdiskfile=rootfs.ext2.gz.uboot\0"			\
+	"fdtaddr=c00000\0"					\
+	"fdtfile=p1023rdb.dtb\0"				\
+	"othbootargs=ramdisk_size=600000\0"			\
+	"bdev=sda1\0"						\
 	"hwconfig=usb1:dr_mode=host,phy_type=ulpi\0"
+
+#define CONFIG_HDBOOT					\
+	"setenv bootargs root=/dev/$bdev rw "		\
+	"console=$consoledev,$baudrate $othbootargs;"	\
+	"tftp $loadaddr $bootfile;"			\
+	"tftp $fdtaddr $fdtfile;"			\
+	"bootm $loadaddr - $fdtaddr"
+
+#define CONFIG_NFSBOOTCOMMAND						\
+	"setenv bootargs root=/dev/nfs rw "				\
+	"nfsroot=$serverip:$rootpath "					\
+	"ip=$ipaddr:$serverip:$gatewayip:$netmask:$hostname:$netdev:off " \
+	"console=$consoledev,$baudrate $othbootargs;"			\
+	"tftp $loadaddr $bootfile;"					\
+	"tftp $fdtaddr $fdtfile;"					\
+	"bootm $loadaddr - $fdtaddr"
+
+#define CONFIG_RAMBOOTCOMMAND						\
+	"setenv bootargs root=/dev/ram rw "				\
+	"console=$consoledev,$baudrate $othbootargs;"			\
+	"tftp $ramdiskaddr $ramdiskfile;"				\
+	"tftp $loadaddr $bootfile;"					\
+	"tftp $fdtaddr $fdtfile;"					\
+	"bootm $loadaddr $ramdiskaddr $fdtaddr"
+
+#define CONFIG_BOOTCOMMAND		CONFIG_RAMBOOTCOMMAND
 
 #endif	/* __CONFIG_H */

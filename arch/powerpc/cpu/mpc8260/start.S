@@ -14,9 +14,6 @@
 #include <mpc8260.h>
 #include <version.h>
 
-#define CONFIG_8260 1		/* needed for Linux kernel header files */
-#define _LINUX_CONFIG_H 1	/* avoid reading Linux autoconf.h file	*/
-
 #include <ppc_asm.tmpl>
 #include <ppc_defs.h>
 
@@ -51,9 +48,6 @@
 	GOT_ENTRY(__init_end)
 	GOT_ENTRY(__bss_end)
 	GOT_ENTRY(__bss_start)
-#if defined(CONFIG_HYMOD)
-	GOT_ENTRY(environment)
-#endif
 	END_GOT
 
 /*
@@ -140,19 +134,6 @@ _hrcw_table:
 
 	.globl	_start
 _start:
-#if defined(CONFIG_MPC8260ADS) && defined(CONFIG_SYS_DEFAULT_IMMR)
-	lis	r3, CONFIG_SYS_DEFAULT_IMMR@h
-	nop
-	lwz	r4, 0(r3)
-	nop
-	rlwinm	r4, r4, 0, 8, 5
-	nop
-	oris	r4, r4, 0x0200
-	nop
-	stw	r4, 0(r3)
-	nop
-#endif /* CONFIG_MPC8260ADS && CONFIG_SYS_DEFAULT_IMMR */
-
 	mfmsr	r5			/* save msr contents		*/
 
 #if defined(CONFIG_COGENT)
@@ -894,18 +875,7 @@ clear_bss:
 	 * Now clear BSS segment
 	 */
 	lwz	r3,GOT(__bss_start)
-#if defined(CONFIG_HYMOD)
-	/*
-	 * For HYMOD - the environment is the very last item in flash.
-	 * The real .bss stops just before environment starts, so only
-	 * clear up to that point.
-	 *
-	 * taken from mods for FADS board
-	 */
-	lwz	r4,GOT(environment)
-#else
 	lwz	r4,GOT(__bss_end)
-#endif
 
 	cmplw	0, r3, r4
 	beq	6f

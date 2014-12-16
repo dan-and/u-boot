@@ -15,6 +15,9 @@
 #define __CONFIG_H
 
 #define CONFIG_MECP5123 1
+#define CONFIG_DISPLAY_BOARDINFO
+#define CONFIG_SYS_GENERIC_BOARD
+
 /*
  * Memory map for the MECP5123 board:
  *
@@ -29,7 +32,6 @@
  * High Level Configuration Options
  */
 #define CONFIG_E300		1	/* E300 Family */
-#define CONFIG_MPC512X		1	/* MPC512X family */
 
 #define	CONFIG_SYS_TEXT_BASE	0xFFF00000
 
@@ -364,7 +366,6 @@
 
 #ifdef CONFIG_CMD_KGDB
 #define CONFIG_KGDB_BAUDRATE	230400	/* speed of kgdb serial port */
-#define CONFIG_KGDB_SER_INDEX	2	/* which serial port to use */
 #endif
 
 /*

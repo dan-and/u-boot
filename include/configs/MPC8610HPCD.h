@@ -14,7 +14,6 @@
 #define __CONFIG_H
 
 /* High Level Configuration Options */
-#define CONFIG_MPC86xx		1	/* MPC86xx */
 #define CONFIG_MPC8610		1	/* MPC8610 specific */
 #define CONFIG_MPC8610HPCD	1	/* MPC8610HPCD board specific */
 #define CONFIG_LINUX_RESET_VEC	0x100	/* Reset vector used by Linux */
@@ -92,7 +91,7 @@
 #define CONFIG_SYS_CCSRBAR_PHYS		CONFIG_SYS_CCSRBAR_PHYS_LOW
 
 /* DDR Setup */
-#define CONFIG_FSL_DDR2
+#define CONFIG_SYS_FSL_DDR2
 #undef CONFIG_FSL_DDR_INTERACTIVE
 #define CONFIG_SPD_EEPROM		/* Use SPD for DDR */
 #define CONFIG_DDR_SPD
@@ -517,7 +516,6 @@
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	230400	/* speed to run kgdb serial port */
-#define CONFIG_KGDB_SER_INDEX	2	/* which serial port to use */
 #endif
 
 /*

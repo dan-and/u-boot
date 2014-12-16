@@ -22,7 +22,6 @@
  * High Level Configuration Options
  */
 #define CONFIG_440EPX		1	/* Specific PPC440EPx		*/
-#define CONFIG_4xx		1	/* ... PPC4xx family		*/
 #define CONFIG_SYS_CLK_FREQ	33333333
 
 #ifdef CONFIG_KORAT_PERMANENT
@@ -542,7 +541,6 @@
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	230400 /* speed to run kgdb serial port	*/
-#define CONFIG_KGDB_SER_INDEX	2	/* which serial port to use	*/
 #endif
 
 /* Pass open firmware flat tree */

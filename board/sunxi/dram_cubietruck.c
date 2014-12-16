@@ -3,34 +3,12 @@
 #include <common.h>
 #include <asm/arch/dram.h>
 
-static struct dram_para dram_para_cb2 = {
-	.clock = 480,
+static struct dram_para dram_para = {
+	.clock = 360,
 	.type = 3,
 	.rank_num = 1,
 	.density = 4096,
-	.io_width = 16,
-	.bus_width = 32,
-	.cas = 9,
-	.zq = 0x7f,
-	.odt_en = 0,
-	.size = 1024,
-	.tpr0 = 0x42d899b7,
-	.tpr1 = 0xa090,
-	.tpr2 = 0x22a00,
-	.tpr3 = 0x0,
-	.tpr4 = 0x1,
-	.tpr5 = 0x0,
-	.emr1 = 0x4,
-	.emr2 = 0x10,
-	.emr3 = 0x0,
-};
-
-static struct dram_para dram_para_ct = {
-	.clock = 432,
-	.type = 3,
-	.rank_num = 1,
-	.density = 8192,
-	.io_width = 16,
+	.io_width = 8,
 	.bus_width = 32,
 	.cas = 9,
 	.zq = 0x7f,
@@ -49,8 +27,5 @@ static struct dram_para dram_para_ct = {
 
 unsigned long sunxi_dram_init(void)
 {
-	unsigned long ram_size = dramc_init(&dram_para_ct);
-	if (ram_size < 2000000000)
-		return dramc_init(&dram_para_cb2);
-	return ram_size;
+	return dramc_init(&dram_para);
 }

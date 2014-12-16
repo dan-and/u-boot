@@ -17,18 +17,20 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#include <asm/sizes.h>
+#include <linux/sizes.h>
 
 #include "tegra30-common.h"
 
-/* Enable fdt support for Cardhu. Flash the image in u-boot-dtb.bin */
-#define CONFIG_DEFAULT_DEVICE_TREE	tegra30-cardhu
-#define CONFIG_OF_CONTROL
-#define CONFIG_OF_SEPARATE
+/* VDD core PMIC */
+#define CONFIG_TEGRA_VDD_CORE_TPS62361B_SET3
 
 /* High-level configuration options */
 #define V_PROMPT		"Tegra30 (Cardhu) # "
 #define CONFIG_TEGRA_BOARD_STRING	"NVIDIA Cardhu"
+
+#define BOARD_EXTRA_ENV_SETTINGS \
+	"board_name=cardhu-a04\0" \
+	"fdtfile=tegra30-cardhu-a04.dtb\0"
 
 /* Board-specific serial config */
 #define CONFIG_SERIAL_MULTI
@@ -41,12 +43,7 @@
 
 /* I2C */
 #define CONFIG_SYS_I2C_TEGRA
-#define CONFIG_SYS_I2C_INIT_BOARD
-#define CONFIG_I2C_MULTI_BUS
-#define CONFIG_SYS_MAX_I2C_BUS		TEGRA_I2C_NUM_CONTROLLERS
-#define CONFIG_SYS_I2C_SPEED		100000
 #define CONFIG_CMD_I2C
-#define CONFIG_SYS_I2C
 
 /* SD/MMC */
 #define CONFIG_MMC

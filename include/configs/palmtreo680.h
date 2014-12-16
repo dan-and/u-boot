@@ -94,7 +94,6 @@
  */
 #ifdef CONFIG_CMD_KGDB
 #define CONFIG_KGDB_BAUDRATE            230400  /* kgdb serial port speed */
-#define CONFIG_KGDB_SER_INDEX           2       /* which serial port to use */
 #endif
 
 /*
@@ -206,7 +205,6 @@
 /*
  * SPL
  */
-#define CONFIG_SPL
 #define CONFIG_SPL_TEXT_BASE    0xa1700000 /* IPL loads SPL here */
 #define CONFIG_SPL_STACK        0x5c040000 /* end of internal SRAM */
 #define CONFIG_SPL_NAND_SUPPORT /* build libnand for spl */

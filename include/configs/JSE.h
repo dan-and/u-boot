@@ -20,8 +20,6 @@
 #define CONFIG_JSE 1
   /* JSE has a PPC405GPr */
 #define CONFIG_405GP 1
-  /* ... which is a 4xxx series */
-#define CONFIG_4x   1
   /* ... with a 33MHz OSC. connected to the SysCLK input */
 #define CONFIG_SYS_CLK_FREQ	33333333
   /* ... with on-chip memory here (4KBytes) */
@@ -274,6 +272,5 @@
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	230400	/* speed to run kgdb serial port */
-#define CONFIG_KGDB_SER_INDEX	2	/* which serial port to use */
 #endif
 #endif	/* __CONFIG_H */

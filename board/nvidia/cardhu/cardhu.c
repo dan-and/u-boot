@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <dm.h>
 #include <asm/arch/pinmux.h>
 #include <asm/arch/gp_padctrl.h>
 #include "pinmux-config-cardhu.h"
@@ -20,14 +21,14 @@
  */
 void pinmux_init(void)
 {
-	pinmux_config_table(tegra3_pinmux_common,
+	pinmux_config_pingrp_table(tegra3_pinmux_common,
 		ARRAY_SIZE(tegra3_pinmux_common));
 
-	pinmux_config_table(unused_pins_lowpower,
+	pinmux_config_pingrp_table(unused_pins_lowpower,
 		ARRAY_SIZE(unused_pins_lowpower));
 
 	/* Initialize any non-default pad configs (APB_MISC_GP regs) */
-	padgrp_config_table(cardhu_padctrl, ARRAY_SIZE(cardhu_padctrl));
+	pinmux_config_drvgrp_table(cardhu_padctrl, ARRAY_SIZE(cardhu_padctrl));
 }
 
 #if defined(CONFIG_TEGRA_MMC)
@@ -37,17 +38,23 @@ void pinmux_init(void)
  */
 void board_sdmmc_voltage_init(void)
 {
+	struct udevice *dev;
 	uchar reg, data_buffer[1];
+	int ret;
 	int i;
 
-	i2c_set_bus_num(0);	/* PMU is on bus 0 */
+	ret = i2c_get_chip_for_busnum(0, PMU_I2C_ADDRESS, &dev);
+	if (ret) {
+		debug("%s: Cannot find PMIC I2C chip\n", __func__);
+		return;
+	}
 
 	/* TPS659110: LDO5_REG = 3.3v, ACTIVE to SDMMC1 */
 	data_buffer[0] = 0x65;
 	reg = 0x32;
 
 	for (i = 0; i < MAX_I2C_RETRY; ++i) {
-		if (i2c_write(PMU_I2C_ADDRESS, reg, 1, data_buffer, 1))
+		if (i2c_write(dev, reg, data_buffer, 1))
 			udelay(100);
 	}
 
@@ -56,7 +63,7 @@ void board_sdmmc_voltage_init(void)
 	reg = 0x67;
 
 	for (i = 0; i < MAX_I2C_RETRY; ++i) {
-		if (i2c_write(PMU_I2C_ADDRESS, reg, 1, data_buffer, 1))
+		if (i2c_write(dev, reg, data_buffer, 1))
 			udelay(100);
 	}
 }

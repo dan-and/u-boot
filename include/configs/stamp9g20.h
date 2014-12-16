@@ -140,11 +140,15 @@
  * can enable it here if your baseboard features ethernet.
  */
 
-/* #define CONFIG_MACB */
+#define CONFIG_MACB
+#define CONFIG_USB_HOST_ETHER
+#define CONFIG_USB_ETHER_ASIX
+#define CONFIG_USB_ETHER_MCS7830
 
 #ifdef CONFIG_MACB
 # define CONFIG_RMII			/* use reduced MII inteface */
 # define CONFIG_NET_RETRY_COUNT	20      /* # of DHCP/BOOTP retries */
+#define CONFIG_AT91_WANTS_COMMON_PHY
 
 /* BOOTP and DHCP options */
 # define CONFIG_BOOTP_BOOTFILESIZE

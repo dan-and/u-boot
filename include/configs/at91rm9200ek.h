@@ -14,7 +14,7 @@
 #ifndef __AT91RM9200EK_CONFIG_H__
 #define __AT91RM9200EK_CONFIG_H__
 
-#include <asm/sizes.h>
+#include <linux/sizes.h>
 
 /*
  * set some initial configurations depending on configure target
@@ -60,6 +60,8 @@
 
 #define CONFIG_CMD_BOOTZ
 #define CONFIG_OF_LIBFDT
+
+#define CONFIG_SYS_GENERIC_BOARD
 
 /*
  * Memory Configuration

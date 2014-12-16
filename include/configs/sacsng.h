@@ -259,7 +259,6 @@
 #define I2C_MOSI	0x00004000      /* PD 17: Master Out, Slave In */
 #define I2C_MISO	0x00008000      /* PD 16: Master In, Slave Out */
 
-#undef  SPI_INIT			/* no port initialization needed */
 #define SPI_READ        ((immr->im_ioport.iop_pdatd & I2C_MISO) != 0)
 #define SPI_SDA(bit)    do {						\
 			if(bit) immr->im_ioport.iop_pdatd |=  I2C_MOSI; \
@@ -457,6 +456,7 @@
 #endif /* CONFIG_BOOT_ROOT_NFS */
 
 #define CONFIG_BOOTP_RANDOM_DELAY       /* Randomize the BOOTP retry delay */
+#define CONFIG_LIB_RAND
 
 /*
  * BOOTP options
@@ -524,7 +524,6 @@
  *
  *****************************************************************************/
 
-#define CONFIG_MPC8260		1	/* This is an MPC8260 CPU   */
 #define CONFIG_SACSng		1	/* munged for the SACSng */
 #define CONFIG_CPM2		1	/* Has a CPM2 */
 

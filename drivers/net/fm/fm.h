@@ -8,8 +8,8 @@
 #define __FM_H__
 
 #include <common.h>
+#include <phy.h>
 #include <fm_eth.h>
-#include <asm/fsl_enet.h>
 #include <asm/fsl_fman.h>
 
 /* Port ID */
@@ -18,9 +18,11 @@
 #define RX_PORT_1G_BASE		0x08
 #define MAX_NUM_RX_PORT_1G	CONFIG_SYS_NUM_FM1_DTSEC
 #define RX_PORT_10G_BASE	0x10
+#define RX_PORT_10G_BASE2	0x08
 #define TX_PORT_1G_BASE		0x28
 #define MAX_NUM_TX_PORT_1G	CONFIG_SYS_NUM_FM1_DTSEC
 #define TX_PORT_10G_BASE	0x30
+#define TX_PORT_10G_BASE2	0x28
 #define MIIM_TIMEOUT    0xFFFF
 
 struct fm_muram {
@@ -141,6 +143,7 @@ struct fm_eth {
 #define MAX_RXBUF_LOG2		11
 #define MAX_RXBUF_LEN		(1 << MAX_RXBUF_LOG2)
 
-#define PORT_IS_ENABLED(port)	fm_info[fm_port_to_index(port)].enabled
+#define PORT_IS_ENABLED(port)	(fm_port_to_index(port) == -1 ? \
+	0 : fm_info[fm_port_to_index(port)].enabled)
 
 #endif /* __FM_H__ */

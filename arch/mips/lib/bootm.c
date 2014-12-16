@@ -6,10 +6,7 @@
  */
 
 #include <common.h>
-#include <command.h>
 #include <image.h>
-#include <u-boot/zlib.h>
-#include <asm/byteorder.h>
 #include <asm/addrspace.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -50,6 +47,20 @@ void arch_lmb_reserve(struct lmb *lmb)
 	/* adjust sp by 4K to be safe */
 	sp -= 4096;
 	lmb_reserve(lmb, sp, CONFIG_SYS_SDRAM_BASE + gd->ram_size - sp);
+}
+
+static int boot_setup_linux(bootm_headers_t *images)
+{
+	int ret;
+	ulong rd_len;
+
+	rd_len = images->rd_end - images->rd_start;
+	ret = boot_ramdisk_high(&images->lmb, images->rd_start,
+		rd_len, &images->initrd_start, &images->initrd_end);
+	if (ret)
+		return ret;
+
+	return 0;
 }
 
 static void linux_cmdline_init(void)
@@ -196,8 +207,10 @@ static void boot_prep_linux(bootm_headers_t *images)
 	if (cp)
 		linux_env_set("eth1addr", cp);
 
-	if (mips_boot_malta)
-		linux_env_set("modetty0", "38400n8r");
+	if (mips_boot_malta) {
+		sprintf(env_buf, "%un8r", gd->baudrate);
+		linux_env_set("modetty0", env_buf);
+	}
 }
 
 static void boot_jump_linux(bootm_headers_t *images)
@@ -222,6 +235,8 @@ static void boot_jump_linux(bootm_headers_t *images)
 int do_bootm_linux(int flag, int argc, char * const argv[],
 			bootm_headers_t *images)
 {
+	int ret;
+
 	/* No need for those on MIPS */
 	if (flag & BOOTM_STATE_OS_BD_T)
 		return -1;
@@ -240,6 +255,10 @@ int do_bootm_linux(int flag, int argc, char * const argv[],
 		boot_jump_linux(images);
 		return 0;
 	}
+
+	ret = boot_setup_linux(images);
+	if (ret)
+		return ret;
 
 	boot_cmdline_linux(images);
 	boot_prep_linux(images);

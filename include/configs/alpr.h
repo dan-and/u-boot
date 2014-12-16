@@ -14,7 +14,6 @@
 #define CONFIG_ALPR		1	    /* Board is ebony		*/
 #define CONFIG_440GX		1	    /* Specifc GX support	*/
 #define CONFIG_440		1	    /* ... PPC440 family	*/
-#define CONFIG_4xx		1	    /* ... PPC4xx family	*/
 #define CONFIG_BOARD_EARLY_INIT_F 1	    /* Call board_pre_init	*/
 #define CONFIG_LAST_STAGE_INIT	1	    /* call last_stage_init()	*/
 
@@ -223,6 +222,7 @@
 #define CONFIG_CMD_DHCP
 #define CONFIG_CMD_EEPROM
 #define CONFIG_CMD_FPGA
+#define CONFIG_CMD_FPGA_LOADMK
 #define CONFIG_CMD_I2C
 #undef CONFIG_CMD_LOADB
 #undef CONFIG_CMD_LOADS
@@ -349,7 +349,6 @@
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	230400	/* speed to run kgdb serial port */
-#define CONFIG_KGDB_SER_INDEX	2	/* which serial port to use */
 #endif
 
 /* pass open firmware flat tree */
